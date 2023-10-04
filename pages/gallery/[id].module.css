@@ -1,0 +1,29 @@
+/* gallery.module.css */
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 16px;
+  justify-items: center;
+}
+
+/* Style for individual image containers */
+.imageGrid a {
+  text-decoration: none;
+  color: inherit;
+  display: block; /* Ensure the anchor element takes the full width of its container */
+  height: 300px; /* Set a fixed height for each image container */
+}
+
+/* Style for the actual images */
+.imageGrid img {
+  max-width: 100%;
+  height: 100%; /* Fill the entire height of the container */
+  object-fit: cover; /* Maintain aspect ratio and cover the container */
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.imageGrid img:hover {
+  transform: scale(1.05);
+}

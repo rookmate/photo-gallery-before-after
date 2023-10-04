@@ -1,0 +1,36 @@
+/* SubGallery.module.css */
+.imageGrid {
+  display: grid;
+  grid-gap: 16px;
+}
+
+.imagePair {
+  display: flex;
+  flex-direction: column; /* Display pairs vertically */
+  align-items: center;
+  text-align: center;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px; /* Add spacing between pairs */
+}
+
+/* Style for the images within a pair */
+.imagePair .column {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px; /* Add spacing between images */
+}
+
+/* Style for the individual images */
+.column img {
+  max-width: 600px; /* Set a fixed width for the images */
+  height: auto;
+  margin: 0 8px; /* Add spacing between images */
+  transition: transform 0.2s ease-in-out;
+}
+
+.column img:hover {
+  transform: scale(1.05);
+}
