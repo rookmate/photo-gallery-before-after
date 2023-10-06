@@ -6,8 +6,8 @@ const Home = () => {
 
   useEffect(() => {
     // Redirect to Gallery 1 when the component mounts
-    router.push('/gallery/1');
-  }, []);
+    router.push('/gallery/');
+  }, [router]); // Include 'router' in the dependency array
 
   return (
     <div>
