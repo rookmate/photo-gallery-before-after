@@ -27,3 +27,8 @@
 .imageGrid img:hover {
   transform: scale(1.05);
 }
+
+.textCentered {
+  text-align: center;
+  margin-top: 10px; /* Adjust the margin to control the spacing between the image and text */
+}
