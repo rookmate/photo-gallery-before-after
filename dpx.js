@@ -2,51 +2,51 @@ const Dropbox = require('dropbox').Dropbox;
 const axios = require('axios');
 require('dotenv').config();
 
-// Define the data to be sent in the POST request
-// Instructions to get the refresh token: https://stackoverflow.com/a/74456272
-const postData = new URLSearchParams({
-  refresh_token: process.env.NEXT_PUBLIC_DROPBOX_REFRESH_TOKEN,
-  grant_type: 'refresh_token',
-});
-
-// Define the headers for the POST request
-const base64authorization = Buffer.from(`${process.env.NEXT_PUBLIC_DROPBOX_APP_KEY}:${process.env.NEXT_PUBLIC_DROPBOX_APP_SECRET}`).toString('base64');
-const headers = {
-  Authorization: `Basic ${base64authorization}`,
-  'Content-Type': 'application/x-www-form-urlencoded',
-};
-
-let ACCESS_TOKEN = ""
-let dbx = ""
-
-// Make the POST request to the Dropbox API
-const retrieveAccessToken = axios.post('https://api.dropbox.com/oauth2/token', postData.toString(), { headers })
-  .then((response) => {
-    ACCESS_TOKEN = response.data.access_token;
-  })
-  .catch((error) => {
-    // Handle errors
-    console.error('Error:', error.message);
+// Make the POST request to retrieve the access token
+async function retrieveAccessToken() {
+  // Instructions to get the refresh token: https://stackoverflow.com/a/74456272
+  const postData = new URLSearchParams({
+    refresh_token: process.env.NEXT_PUBLIC_DROPBOX_REFRESH_TOKEN,
+    grant_type: 'refresh_token',
   });
 
-function performActionsWithAccessToken() {
-  dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
-  //getCurrentAccount();
-  //listRootFiles();
+  const base64authorization = Buffer.from(`${process.env.NEXT_PUBLIC_DROPBOX_APP_KEY}:${process.env.NEXT_PUBLIC_DROPBOX_APP_SECRET}`).toString('base64');
+  const headers = {
+    Authorization: `Basic ${base64authorization}`,
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
 
-  //const folderPath = '/house1';
-  //listFilesInFolder(folderPath);
-
-  //findFilesWithMatchingNames();
-  //sharedLink();
-  findFilesWithBeforeAfter('house1');
+  try {
+    const response = await axios.post('https://api.dropbox.com/oauth2/token', postData.toString(), { headers });
+    const accessToken = response.data.access_token;
+    return accessToken;
+  } catch (error) {
+    // Handle errors
+    console.error('Error:', error.message);
+    return null;
+  }
 }
 
-retrieveAccessToken.then(() => {
-  performActionsWithAccessToken();
-});
+async function main() {
+  const ACCESS_TOKEN = await retrieveAccessToken();
+
+  if (ACCESS_TOKEN) {
+    const dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+    //getCurrentAccount(dbx);
+    //listRootFiles(dbx);
+
+    //const folderPath = '/house1';
+    //listFilesInFolder(dbx, folderPath);
+
+    //findFilesWithMatchingNames(dbx);
+    //sharedLink(dbx);
+    findFilesWithBeforeAfter(dbx, 'house1');
+  }
+}
+
+main();
 //-----------------------------------------------------------------------------------------------//
-function getCurrentAccount() {
+function getCurrentAccount(dbx) {
   dbx.usersGetCurrentAccount()
     .then(function(response) {
       console.log(response);
@@ -56,7 +56,7 @@ function getCurrentAccount() {
     });
 }
 //-----------------------------------------------------------------------------------------------//
-function listRootFiles() {
+function listRootFiles(dbx) {
   dbx.filesListFolder({path: ''})
     .then(function(response) {
       console.log(response.result.entries);
@@ -67,7 +67,7 @@ function listRootFiles() {
 }
 //-----------------------------------------------------------------------------------------------//
 // Function to list all files inside a folder
-function listFilesInFolder(folderPath) {
+function listFilesInFolder(dbx, folderPath) {
   dbx.filesListFolder({ path: folderPath })
     .then(function (response) {
       response.result.entries.forEach(function (entry) {
@@ -82,7 +82,7 @@ function listFilesInFolder(folderPath) {
 }
 //-----------------------------------------------------------------------------------------------//
 // Function to find files with the same name as their parent folder
-function findFilesWithMatchingNames() {
+function findFilesWithMatchingNames(dbx) {
   dbx.filesListFolder({ path: '' })
     .then(function (response) {
       if (response.result.entries && response.result.entries.length > 0) {
@@ -117,7 +117,7 @@ function findFilesWithMatchingNames() {
     });
 }
 //-----------------------------------------------------------------------------------------------//
-async function sharedLink() {
+async function sharedLink(dbx) {
   var photoURL = "";
 
   await dbx.sharingCreateSharedLinkWithSettings({ path: "/house3/house3.png" })
@@ -151,7 +151,7 @@ function compareByName(a, b) {
 }
 
 // Function to find files with the same name as their parent folder
-async function findFilesWithBeforeAfter(folderSelected) {
+async function findFilesWithBeforeAfter(dbx, folderSelected) {
   before = []
   after = []
   await dbx.filesListFolder({ path: '/'+folderSelected })
