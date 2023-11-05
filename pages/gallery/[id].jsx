@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import styles from './[id].module.css';
 const Dropbox = require('dropbox').Dropbox;
-import axios from 'axios'; 
+import axios from 'axios';
 
 async function retrieveAccessToken() {
   // Instructions to get the refresh token: https://stackoverflow.com/a/74456272
@@ -58,23 +58,24 @@ async function fetchData() {
             for (const match of searchResponse.result.matches) {
               const metadata = match.metadata;
               if (metadata.name.split('.').slice(0, 1).join('.') === folderName) {
-                let photoURL = "";
-                try {
-                  const response = await dbx.sharingCreateSharedLinkWithSettings({ path: metadata.path_display });
-                  photoURL = response.result.url;
-                } catch (error) {
-                  if (error.status === 409) {
-                    // Handle the case where the shared link already exists
-                    photoURL = error.error.error.shared_link_already_exists.metadata.url;
-                  } else {
-                    console.error('Error creating shared link:', error);
+                if (metadata['.tag'] === 'file') {
+                  let photoURL = "";
+                  try {
+                    const response = await dbx.sharingCreateSharedLinkWithSettings({ path: metadata.path_display });
+                    photoURL = response.result.url;
+                  } catch (error) {
+                    if (error.status === 409) {
+                      // Handle the case where the shared link already exists
+                      photoURL = error.error.error.shared_link_already_exists.metadata.url;
+                    } else {
+                      console.error('Error creating shared link:', error);
+                    }
                   }
+                  photos.push({
+                    name: metadata.name.split('.')[0],
+                    url: photoURL.replace('dl=0', 'dl=1'),
+                  });
                 }
-                photos.push({
-                  name: metadata.name.split('.')[0],
-                  url: photoURL.replace('dl=0', 'dl=1'),
-                });
-                
               }
             }
           } else {
@@ -105,7 +106,7 @@ function HouseGallery({ photos, folderName }) {
     <div className={styles.imageGrid}>
       {photos.map((photo, index) => (
         <a href={`/gallery/before-and-after/${index}`} // Specify the dynamic route
-          as={`/gallery/${folderName}/before-and-after/${index}`} // Define the actual URL 
+          as={`/gallery/${folderName}/before-and-after/${index}`} // Define the actual URL
           key={index} className={styles.photo}
           >
           <Image
